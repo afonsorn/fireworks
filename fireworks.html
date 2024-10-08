@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<!--Authors: 52281 Diogo Gomes & 53193 Afonso Nascimento-->
+<html>
+<head>
+<script id="vertex-shader-vertices" type="x-shader/x-vertex">
+attribute vec2 vPosition;
+attribute vec2 vSpeed;
+attribute vec2 newSpeed;
+attribute vec2 newNewSpeed;
+attribute vec3 vColor;
+attribute float initTime;
+attribute float explosionTime;
+uniform float time;
+varying vec4 fColor;
+void main(){
+    float g = -0.1; //gravitational acceleration
+    float op = 1.0; //opacity
+    float secondEXtime = 2.0; 
+    fColor = vec4(vColor,op);
+    gl_Position = vec4(vPosition,0,1);
+    gl_Position.x += vSpeed[0]*(time-initTime);
+    gl_Position.y += vSpeed[1]*(time-initTime) + 0.5*g*(time-initTime)*(time-initTime);
+    gl_PointSize = 10.0;
+    
+    if((time-initTime)>= explosionTime){
+        fColor = vec4(vColor,op-=0.1*((time-initTime)-explosionTime));
+        gl_Position.x += newSpeed[0]*((time-initTime)-explosionTime);
+        gl_Position.y += newSpeed[1]*((time-initTime)-explosionTime);
+        gl_PointSize = 5.0;
+    }
+    if((time-initTime)>= (explosionTime + secondEXtime)){
+        fColor = vec4(vColor,op);
+        gl_Position.x += newNewSpeed[0]*((time-initTime)-(explosionTime + secondEXtime));
+        gl_Position.y += newNewSpeed[1]*((time-initTime)-(explosionTime + secondEXtime));
+        if(newNewSpeed[0] > 0.0 || newNewSpeed[1] > 0.0)
+            gl_PointSize = 3.0;
+    }
+    
+}
+</script>
+<script id="vertex-shader-lines" type="x-shader/x-vertex">
+attribute vec4 vPosition;
+attribute vec3 vColor;
+varying vec4 fColor;
+void main(){
+    fColor = vec4(vColor,1.0);
+    gl_Position = vPosition;
+    gl_PointSize = 10.0;
+}
+</script>
+<script id="fragment-shader" type="x-shader/x-fragment">
+precision mediump float;
+varying vec4 fColor; 
+void main() {
+    if(distance(gl_PointCoord, vec2(0.5)) > 0.5) 
+            discard;
+    gl_FragColor = fColor;
+}
+</script>
+<script type="text/javascript" src="./lib/webgl-utils.js"></script>
+<script type="text/javascript" src="./lib/initShaders.js"></script>
+<script type="text/javascript" src="./lib/MV.js"></script>
+<script type="text/javascript" src="fireworks.js"></script>
+</head>
+<body>
+    <title>Triangle</title>
+    <canvas id="gl-canvas" width="800" height="512">
+        Oops... your browser doesn't support the HTML5 canvas element"
+    </canvas>
+    <p>Press <b>Space</b> to switch to auto launch</p>
+    <p>Press <b>Enter</b> to toggle second explosion</p>
+</body>
+</html>
